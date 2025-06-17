@@ -47,6 +47,9 @@ import com.sist.web.service.*;
  *       => 도커 종료   systemctl stop docker
  *       => 도커 실행   systemctl start docker 
  *       => docker enabled
+ *       
+ *       => image만드는 방법 / image 실행 / docker hub에 저장 방법 
+ *          ------------------------------------------------ 
  */
 public class MainController {
    @Autowired
