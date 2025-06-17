@@ -56,7 +56,7 @@ jobs:
         tags: chaijewon/myapp:latest.
 
     - name: Login docker hub
-      run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+      run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
         
       # docker hub 퍼블리시
