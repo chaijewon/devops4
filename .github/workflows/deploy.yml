@@ -48,10 +48,12 @@ jobs:
     #- name: 기존프로세스 종료
     #  run: |
     #    kill -9 $(ps -ef | grep devops | grep -v grep | head -n 1 | awk '{print $2}') || true
-    - name: Build Docker image
-      run: docker build -t chaijewon/myapp:latest -t chaijewon/myapp:${{ github.sha }} .
-           docker push chaijewon/myapp:latest
-           docker push chaijewon/myapp:${{ github.sha }} .
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: chaijewon/myapp:latest.
 
     - name: Login docker hub
       uses: docker/login-action@v2
