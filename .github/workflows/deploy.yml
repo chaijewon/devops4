@@ -56,10 +56,8 @@ jobs:
         tags: chaijewon/myapp:latest.
 
     - name: Login docker hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }} 
+      run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
         
       # docker hub 퍼블리시
     - name: Publish to docker hub
