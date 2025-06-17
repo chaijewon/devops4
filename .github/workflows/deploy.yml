@@ -11,14 +11,14 @@ jobs:
 
     steps:
     # 코드 체크아웃
-    - name: Checkout repository
-      uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-    # JDK 17 설정
-    - name: Set up JDK 17
-      uses: actions/setup-java@v1
+    - name: Set up JDK
+      uses: actions/setup-java@v3
       with:
-        java-version: '17'
+          java-version: '17'
+          distribution: 'temurin'
 
     # gradlew 권한 설정
     - name: Set gradlew permissions
@@ -44,19 +44,26 @@ jobs:
     - name: Add known_hosts
       run: |
         ssh-keyscan -t ed25519 13.125.86.33 >> ~/.ssh/known_hosts
-
+    
     #- name: 기존프로세스 종료
     #  run: |
     #    kill -9 $(ps -ef | grep devops | grep -v grep | head -n 1 | awk '{print $2}') || true
+    - name: Build Docker image
+      run: docker build -t myapp:latest .
+
+    - name: Save Docker image as tar
+      run: docker save myapp:latest -o myapp.tar
 
     - name: Deploy to Server with rsync
       run: | 
-         rsync -avz -e "ssh -o StrictHostKeyChecking=no" build/libs/*.jar ubuntu@13.125.86.33:~/app
+         rsync -avz -e "ssh -o StrictHostKeyChecking=no" myapp.tar ubuntu@13.125.86.33:~/app
 
 
     - name: Run SSH commands
       run: |
         ssh -i ~/.ssh/id_ed25519 ubuntu@13.125.86.33 << 'EOF'
-          pkill -f 'java -jar' || true
-          nohup java -jar ~/app/devops4-0.0.1-SNAPSHOT.jar > log.txt 2>&1 &
+          docker stop myapp || true
+          docker rm myapp || true
+          docker load -i ~/app/myapp.tar
+          docker run -d --name myapp -p 8080:8080 myapp:latest
         EOF
