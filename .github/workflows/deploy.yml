@@ -11,7 +11,7 @@ jobs:
 
     steps:
     # 코드 체크아웃
-    - name: Checkout code
+    - name: Checkout-source code
       uses: actions/checkout@v3
 
     - name: Set up JDK
@@ -27,7 +27,7 @@ jobs:
 
     # gradle 빌드
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew clean build
 
     - name: Set SSH key permissions
       run: |
@@ -49,11 +49,18 @@ jobs:
     #  run: |
     #    kill -9 $(ps -ef | grep devops | grep -v grep | head -n 1 | awk '{print $2}') || true
     - name: Build Docker image
-      run: docker build -t myapp:latest .
+      run: docker build -t chaijewon/myapp:last .
 
-    - name: Save Docker image as tar
-      run: docker save myapp:latest -o myapp.tar
-
+    - name: Login docker hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }} 
+        
+      # docker hub 퍼블리시
+    - name: Publish to docker hub
+      run: docker push chaijewon/myapp
+      
     - name: Deploy to Server with rsync
       run: | 
          rsync -avz -e "ssh -o StrictHostKeyChecking=no" myapp.tar ubuntu@13.125.86.33:~/app
@@ -64,6 +71,6 @@ jobs:
         ssh -i ~/.ssh/id_ed25519 ubuntu@13.125.86.33 << 'EOF'
           docker stop myapp || true
           docker rm myapp || true
-          docker load -i ~/app/myapp.tar
-          docker run -d --name myapp -p 8080:8080 myapp:latest
+          docker pull chaijewon/myapp
+          docker run -d -p 8080:8080 --name springboot-myapp chaijewon/myapp
         EOF
